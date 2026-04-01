@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+requests
+python-dotenv
+pymupdf
+python-multipart
+langchain
+langchain-nvidia-ai-endpoints
+faiss-cpu
+langchain-community
+pandas
+openpyxl
+reportlab
