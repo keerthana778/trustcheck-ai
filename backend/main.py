@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List
@@ -166,8 +167,13 @@ def download_report():
     file_path = generate_pdf(data)
     return FileResponse(file_path, media_type="application/pdf", filename="report.pdf")
 =======
+=======
+from fastapi import FastAPI, UploadFile, File
+>>>>>>> 3af0a4a (Added PDF analysis + AI integration)
 from pydantic import BaseModel
 from services.bedrock_services import generate_response
+import fitz  # PyMuPDF
+import re
 
 app = FastAPI()
 
@@ -182,5 +188,54 @@ def root():
 def ask_ai(query: Query):
     response = generate_response(query.prompt)
     return {"response": response}
+<<<<<<< HEAD
 >>>>>>> a0578f6375831ceb0460556cb8cf5c86cc0a5410
 >>>>>>> bf570bd3f3d364223ad72f373dbfb41b01d34a32
+=======
+
+@app.post("/analyze-document")
+async def analyze_document(file: UploadFile = File(...)):
+    content = await file.read()
+
+    # Read PDF
+    doc = fitz.open(stream=content, filetype="pdf")
+    text = ""
+
+    for page in doc:
+        text += page.get_text()
+
+    # Limit text (VERY IMPORTANT)
+    text = text[:3000]
+
+    prompt = f"""
+    Analyze this document and:
+    1. Give a clear summary
+    2. List key risks
+    3. Explain in simple terms
+    4. Give a trust score (0-100)
+
+    Document:
+    {text}
+    """
+
+    response = generate_response(prompt)
+
+    # 🔥 CLEAN OUTPUT PROPERLY
+    cleaned = response
+
+    # Fix newlines
+    cleaned = cleaned.replace("\\n", "\n")
+
+    # Remove markdown bold (**text**)
+    cleaned = re.sub(r"\*\*(.*?)\*\*", r"\1", cleaned)
+
+    # Remove headings (###)
+    cleaned = re.sub(r"#+\s*", "", cleaned)
+
+    # Replace bullets
+    cleaned = cleaned.replace("- ", "• ")
+
+    cleaned = cleaned.strip()
+
+    return {"analysis": cleaned}
+>>>>>>> 3af0a4a (Added PDF analysis + AI integration)
